@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour {
     //variables for variable jump height
     public float maxJumpVelocity;
     public float minJumpVelocity;
+    public int jumpCount;
+    public int curJumpCount;
 
     //Boolean to decide if you can possess or not
     [HideInInspector]
@@ -110,6 +112,7 @@ public class PlayerController : MonoBehaviour {
                 {
                     //this line literally moves the character by changing its velocity directly
                     rb.velocity = new Vector2(moveInput.x * moveSpeed, rb.velocity.y);
+                    jumpCount = curJumpCount;
                 }
                 else
                 {
@@ -183,7 +186,7 @@ public class PlayerController : MonoBehaviour {
             case PlayerStates.JumpingUp:
                 //if you jump it changes your y velocity to the maxJumpVelocity
                 Movement.JumpPlayer(ref rb, isGrounded, maxJumpVelocity);
-
+                jumpCount--;
                 //if you release jump while your y velocity is above your minJumpVelocity, your velocity gets set to your min jump velocity (variable jump height)
                 if (Input.GetButtonUp("Jump"))
                 {
@@ -210,6 +213,11 @@ public class PlayerController : MonoBehaviour {
                     }
                     currentState = PlayerStates.Idle;
                 }
+                if (Input.GetButtonDown("Jump") && jumpCount > 0)
+                {
+                    wasJustIdle = false;
+                    currentState = PlayerStates.JumpingUp;
+                }
                 if (Input.GetButtonDown("Enter") && canPossess)
                 {
                     entering = true;
@@ -222,6 +230,7 @@ public class PlayerController : MonoBehaviour {
                 spriteRenderer.color = Color.clear;
                 if (possessing && Input.GetButtonDown("Jump") || possessionTimer <= 0)
                 {
+                    jumpCount = curJumpCount;
                     possessionTimer = possessionTimerOriginal;
                     RevertParent();
                     if(coreRB.velocity == new Vector2(0, 0)) 
